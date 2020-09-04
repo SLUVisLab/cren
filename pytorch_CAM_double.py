@@ -14,7 +14,7 @@ import pdb
 from glob import glob
 import os
 import random
-num_classes=100
+num_classes=397
 if not os.path.exists("./CAM_test"):
     os.mkdir("./CAM_test")
 CAM_dir="./CAM_test"
@@ -134,11 +134,11 @@ def returnCAM1(feature_conv, weight_softmax, class_idx):
             if max<np.max(cam):
                 max=np.max(cam)
             sub_cam.append(cam)
-            #sub_cam.append(cv2.resize(cam_img, size_upsample))
         for i in range(4):
             sub_cam[i]=sub_cam[i]-min
             sub_cam[i]=sub_cam[i]/max
             sub_cam[i]=np.uint8(sub_cam[i]*255)
+            sub_cam[i]=cv2.resize(sub_cam[i], size_upsample,interpolation=cv2.INTER_NEAREST)
         output_cam.append(sub_cam)
     return output_cam
 
@@ -176,9 +176,9 @@ def hook_feature1(module, input, output):
 
 def hook_feature2(module, input, output):
     features_blobs2.append(output.data.cpu().numpy())
-file="/www/student/cren2/public_html/TERRA/datasets_RGB_one/val/PI_22913/2017-06-13__15-03-20-650.png"
+file="/lab/vislab/DATA/SUN397/datasets_SUN/val/abbey/sun_awmdgbfmljliozsj.png"
 img_pil = Image.open(file)
-net = torch.load('train_double_RGB_one/model.pth')
+net = torch.load('train_double_SUN/model.pth')
 finalconv_name = "7"
 net.eval()
 features_blobs1 = []
