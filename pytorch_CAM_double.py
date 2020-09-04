@@ -15,6 +15,9 @@ from glob import glob
 import os
 import random
 num_classes=100
+if not os.path.exists("./CAM_test"):
+    os.mkdir("./CAM_test")
+CAM_dir="./CAM_test"
 class ModelParallelResNet50(nn.Module):
     def __init__(self):
 
@@ -97,10 +100,10 @@ def val_crops(img):
     random.shuffle(l)
     l=l[:4]
     print(l,a,b)
-    return [[crs[l[0]],crs[l[1]],crs[l[2]],crs[l[3]]]+[re(Cenc(img))],[(int(l[0]%a)*256,int(l[0]/a)*256),
-                                                                       (int(l[1]%a)*256,int(l[1]/a)*256),
-                                                                       (int(l[2]%a)*256,int(l[2]/a)*256),
-                                                                       (int(l[3]%a)*256,int(l[3]/a)*256)]]
+    return [[crs[l[0]],crs[l[1]],crs[l[2]],crs[l[3]]]+[re(Cenc(img))],[(int(l[0]/b)*256,int(l[0]%b)*256),
+                                                                       (int(l[1]/b)*256,int(l[1]%b)*256),
+                                                                       (int(l[2]/b)*256,int(l[2]%b)*256),
+                                                                       (int(l[3]/b)*256,int(l[3]%b)*256)]]
 
 
 
@@ -118,7 +121,7 @@ def returnCAM1(feature_conv, weight_softmax, class_idx):
         _,idn=torch.max(fe,axis=0)
         pro_layer = np.zeros((bz, nc, h, w))
         for i in range(nc):
-            pro_layer[int(idn[i]),i]=(np.zeros((h,w))+1)
+            pro_layer[int(idn[i]),i]=np.zeros((h,w))+1
         feature_conv=feature_conv*pro_layer
         sub_cam = []
         min=10000
@@ -173,7 +176,7 @@ def hook_feature1(module, input, output):
 
 def hook_feature2(module, input, output):
     features_blobs2.append(output.data.cpu().numpy())
-file="datasets_RGB_one/val/PI_152828/2017-06-01__13-29-49-704.png"
+file="/www/student/cren2/public_html/TERRA/datasets_RGB_one/val/PI_22913/2017-06-13__15-03-20-650.png"
 img_pil = Image.open(file)
 net = torch.load('train_double_RGB_one/model.pth')
 finalconv_name = "7"
@@ -191,8 +194,8 @@ probs, idx = h_x.sort(0, True)
 probs = probs.cpu().numpy()
 idx = idx.cpu().numpy()
 params = list(net.parameters())
-weight_softmax1 = np.squeeze(params[-2].data.cpu().numpy())[:100,:2048]
-weight_softmax2 = np.squeeze(params[-2].data.cpu().numpy())[:100,-2048:]
+weight_softmax1 = np.squeeze(params[-2].data.cpu().numpy())[:,:2048]
+weight_softmax2 = np.squeeze(params[-2].data.cpu().numpy())[:,-2048:]
 CAMs1 = returnCAM1(features_blobs1[0], weight_softmax1, [idx[0]])
 CAMs2 = returnCAM2(features_blobs2[0], weight_softmax2, [idx[0]])
 
@@ -201,7 +204,6 @@ img=np.array(resize(img_pil))
 w,h,c=img.shape
 he1=np.zeros((w,h,c))
 print(img_tensor[1])
-print(len(CAMs1[0]))
 for i in range(4):
     heatmap1 = cv2.applyColorMap(cv2.resize(CAMs1[0][i], (256, 256)), cv2.COLORMAP_JET)
     he1[img_tensor[1][i][0]:img_tensor[1][i][0]+256,img_tensor[1][i][1]:img_tensor[1][i][1]+256,0:c]=heatmap1
@@ -212,7 +214,10 @@ img=cv2.resize(img,(h,w))
 print(img.shape)
 result1=0.5*img+0.4*he1
 result2=0.5*img+0.4*he2
-
-cv2.imwrite('result1.jpg', result1)
-cv2.imwrite('result2.jpg', result2)
+result=0.4*img+0.3*he1+0.3*he2
+cv2.imwrite(CAM_dir+"/"+'result.jpg', result)
+cv2.imwrite(CAM_dir+"/"+'result1.jpg', result1)
+cv2.imwrite(CAM_dir+"/"+'result2.jpg', result2)
+cv2.imwrite(CAM_dir+"/"+'source.jpg', img)
+print(idx[0])
 
