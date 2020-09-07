@@ -264,12 +264,14 @@ def initialize_model(model_name, num_classes, feature_extract, use_pretrained=Tr
         ct=0
         for child in model_ft.model1.children():
             ct += 1
+            #change the "8" to "7" or "6" to unfreeze one more layer or two
             if ct < 8:
                 for param in child.parameters():
                     param.requires_grad = False
         ct=0
         for child in model_ft.model2.children():
             ct += 1
+            #change the "8" to "7" or "6" to unfreeze one more layer or two, both need to be changed.
             if ct < 8:
                 for param in child.parameters():
                     param.requires_grad = False
