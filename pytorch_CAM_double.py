@@ -14,7 +14,6 @@ import pdb
 from glob import glob
 import os
 import random
-#change num_classes
 num_classes=397
 if not os.path.exists("./CAM_test"):
     os.mkdir("./CAM_test")
@@ -177,10 +176,8 @@ def hook_feature1(module, input, output):
 
 def hook_feature2(module, input, output):
     features_blobs2.append(output.data.cpu().numpy())
-#change filename
 file="/lab/vislab/DATA/SUN397/datasets_SUN/val/abbey/sun_awmdgbfmljliozsj.png"
 img_pil = Image.open(file)
-#change model
 net = torch.load('train_double_SUN/model.pth')
 finalconv_name = "7"
 net.eval()
