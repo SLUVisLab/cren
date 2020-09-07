@@ -19,12 +19,13 @@ print("Torchvision Version: ",torchvision.__version__)
 
 # Top level data directory. Here we assume the format of the directory conforms
 #   to the ImageFolder structure
+#data_dir is where your dataset is, store_dir is where to sotre your trained model and anything about this.
 data_dir = "/lab/vislab/DATA/SUN397/datasets_SUN"
 store_dir= 'train_double_SUN'
 # Models to choose from [resnet, alexnet, vgg, squeezenet, densenet, inception]
 model_name = "double"
 
-# Number of classes in the dataset
+# Number of classes in the dataset, remember to change to the correct number.
 num_classes = 397
 
 # Batch size for training (change depending on how much memory you have)
